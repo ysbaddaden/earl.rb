@@ -5,18 +5,15 @@ require "minitest/pride"
 class Minitest::Test
   def eventually(timeout = 5)
     started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-
-    loop do
+    begin
       Earl.sleep(0)
-
-      begin
-        yield
-      rescue ex
-        stopped = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-        raise ex if (stopped - started) > timeout
-      else
-        break
-      end
+      yield
+    rescue Minitest::Assertion => ex
+      stopped = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      raise ex if (stopped - started) > timeout
+      retry
+    else
+      return
     end
   end
 end
