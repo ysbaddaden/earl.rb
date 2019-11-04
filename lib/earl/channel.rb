@@ -4,7 +4,7 @@ require "earl/errors"
 
 module Earl
   class Channel
-    def initialize(capacity = 1)
+    def initialize(capacity = 10)
       @state = :open
       @capacity = capacity
       @size = 0
