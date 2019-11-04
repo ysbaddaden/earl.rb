@@ -6,4 +6,7 @@ module Earl
 
   class TransitionError < Error
   end
+
+  class ClosedError < Error
+  end
 end

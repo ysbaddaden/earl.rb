@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require "earl/agent"
+require "earl/mailbox"
 
 module Earl
   def self.sleep(duration)
