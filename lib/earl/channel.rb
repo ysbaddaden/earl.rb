@@ -9,7 +9,7 @@ module Earl
       @capacity = capacity
       @size = 0
       @start = 0
-      @values = []
+      @values = Array.new(capacity)
       @senders = Async::Notification.new
       @receivers = Async::Notification.new
     end
