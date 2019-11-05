@@ -2,6 +2,7 @@
 require "earl/agent"
 require "earl/artist"
 require "earl/mailbox"
+require "earl/pool"
 require "earl/supervisor"
 
 module Earl
