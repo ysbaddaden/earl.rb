@@ -1,26 +1,25 @@
 # frozen_string_literal: true
 require "test_helper"
-require "earl"
-
-class Counter
-  include Earl::Agent
-  include Earl::Mailbox
-
-  attr_reader :value
-
-  def initialize(value = 0)
-    @value = value
-  end
-
-  def call
-    while increment = receive?
-      @value += increment
-    end
-  end
-end
 
 module Earl
   class MailboxTest < Minitest::Test
+    class Counter
+      include Earl::Agent
+      include Earl::Mailbox
+
+      attr_reader :value
+
+      def initialize(value = 0)
+        @value = value
+      end
+
+      def call
+        while increment = receive?
+          @value += increment
+        end
+      end
+    end
+
     def test_send
       Async do
         counter = Counter.new(0)

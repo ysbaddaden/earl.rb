@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require "async"
 require "earl/agent/state"
 
 module Earl
@@ -9,9 +8,9 @@ module Earl
 
       begin
         call
-      rescue => ex
+      rescue => e
         state.transition(:crashed)
-        link.trap(self, ex) if link
+        link.trap(self, e) if link
       else
         link.trap(self, nil) if link
         stop if running?

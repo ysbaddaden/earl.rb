@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 require "test_helper"
-require "earl"
 
 module Earl
   class SupervisorTest < Minitest::Test
@@ -61,14 +60,14 @@ module Earl
     end
 
     def test_recycles_supervised_agents
+      agent = Noop.new(monkey: true)
+      supervisor = Supervisor.new
+
+      supervisor.monitor(agent)
+      assert supervisor.starting?
+      assert agent.starting?
+
       Async do
-        agent = Noop.new(monkey: true)
-        supervisor = Supervisor.new
-
-        supervisor.monitor(agent)
-        assert supervisor.starting?
-        assert agent.starting?
-
         supervisor.async
         eventually { assert supervisor.running? }
 

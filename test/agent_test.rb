@@ -1,53 +1,52 @@
 # frozen_string_literal: true
 require "test_helper"
-require "earl"
-
-class StatusAgent
-  include Earl::Agent
-
-  attr_reader :called
-  attr_reader :terminated
-
-  def initialize
-    @called = false
-    @terminated = false
-  end
-
-  def call
-    @called = true
-
-    while running?
-      sleep(0)
-    end
-  end
-
-  def terminate
-    @terminated = true
-  end
-end
-
-class Noop
-  include Earl::Agent
-
-  attr_reader :called
-  attr_reader :terminated
-
-  def initialize
-    @called = false
-    @terminated = 0
-  end
-
-  def call
-    @called = true
-  end
-
-  def terminate
-    @terminated += 1
-  end
-end
 
 module Earl
   class AgentTest < Minitest::Test
+    class StatusAgent
+      include Earl::Agent
+
+      attr_reader :called
+      attr_reader :terminated
+
+      def initialize
+        @called = false
+        @terminated = false
+      end
+
+      def call
+        @called = true
+
+        while running?
+          sleep(0)
+        end
+      end
+
+      def terminate
+        @terminated = true
+      end
+    end
+
+    class Noop
+      include Earl::Agent
+
+      attr_reader :called
+      attr_reader :terminated
+
+      def initialize
+        @called = false
+        @terminated = 0
+      end
+
+      def call
+        @called = true
+      end
+
+      def terminate
+        @terminated += 1
+      end
+    end
+
     def test_state
       Async do
         agent = StatusAgent.new

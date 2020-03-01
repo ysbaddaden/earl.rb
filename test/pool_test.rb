@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 require "test_helper"
-require "earl"
 
 module Earl
   class PoolTest < Minitest::Test
@@ -8,8 +7,7 @@ module Earl
       include Earl::Artist
 
       def handle(message)
-        puts "received #{message}"
-        #log.info "received #{message}"
+        log.info "received #{message}"
         Earl.sleep(0)
         raise "chaos monkey" if rand(0..9) == 1
       end

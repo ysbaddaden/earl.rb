@@ -1,4 +1,4 @@
-require "earl/channel"
+# frozen_string_literal: true
 
 module Earl
   module Mailbox
@@ -38,11 +38,10 @@ module Earl
     private
 
     def mailbox
-      @mailbox ||=
-        begin
-          @mailbox_close_on_stop = true
-          Channel.new(mailbox_capacity)
-        end
+      @mailbox ||= begin
+        @mailbox_close_on_stop = true unless defined?(@mailbox_close_on_stop)
+        Channel.new(mailbox_capacity)
+      end
     end
   end
 end

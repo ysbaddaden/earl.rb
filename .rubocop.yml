@@ -1,0 +1,35 @@
+AllCops:
+  TargetRubyVersion: 2.5
+  DisabledByDefault: true
+
+Bundler:
+  Enabled: true
+
+Lint:
+  Enabled: true
+Lint/AssignmentInCondition:
+  Enabled: false
+Lint/AmbiguousBlockAssociation:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: true
+Metrics/ParameterLists:
+  Enabled: true
+
+Migration:
+  Enabled: true
+
+Naming:
+  Enabled: true
+
+Security:
+  Enabled: true
+
+Style/EmptyMethod:
+  EnforcedStyle: expanded
+Style/FrozenStringLiteralComment:
+  Enabled: true
+Style/StringLiterals:
+  Enabled: true
+  EnforcedStyle: double_quotes

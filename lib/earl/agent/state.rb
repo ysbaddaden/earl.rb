@@ -14,7 +14,7 @@ module Earl
         @status
       end
 
-      def can_transition?(new_status)
+      def can_transition?(new_status) # rubocop:disable Metrics/CyclomaticComplexity
         case @status
         when :starting
           new_status == :running
@@ -33,7 +33,7 @@ module Earl
 
       def transition(new_status)
         if can_transition?(new_status)
-          # Logger.debug(@agent) { "transition from=#{@status} to=#{new_status}" }
+          Earl.logger.debug(@agent) { "transition from=#{@status} to=#{new_status}" }
           @status = new_status
         else
           raise TransitionError.new("can't transition agent state from #{@status} to #{new_status}")

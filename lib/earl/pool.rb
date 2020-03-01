@@ -1,4 +1,4 @@
-require "earl/artist"
+# frozen_string_literal: true
 require "earl/channel"
 
 module Earl
@@ -19,8 +19,7 @@ module Earl
           @workers << agent
 
           while agent.starting?
-            #log.info { "starting worker" }
-            puts "I: starting worker"
+            log.info { "starting worker" }
             agent.mailbox = mailbox
             agent.start(link: self)
           end
@@ -36,13 +35,10 @@ module Earl
 
     def trap(agent, exception = nil)
       if exception
-        #Logger.error(agent, exception)
-        p exception
-        #log.error { "worker crashed (#{exception.class.name})" }
-        puts "E: worker crashed (#{exception.class.name})"
+        Earl.logger.exception(agent, exception)
+        log.error { "worker crashed (#{exception.class.name})" }
       elsif agent.running?
-        #log.warn { "worker stopped unexpectedly" }
-        puts "W: worker stopped unexpectedly"
+        log.warn { "worker stopped unexpectedly" }
       end
 
       if running?

@@ -1,10 +1,10 @@
-require "async"
+# frozen_string_literal: true
 require "async/notification"
 require "earl/errors"
 
 module Earl
   class Channel
-    def initialize(capacity = 10)
+    def initialize(capacity = 1000)
       @state = :open
       @capacity = capacity
       @size = 0
@@ -49,14 +49,14 @@ module Earl
       nil
     end
 
+    def closed?
+      @state == :closed
+    end
+
     protected
 
     def closing?
       @state != :open
-    end
-
-    def closed?
-      @state == :closed
     end
 
     def send_impl(value)
@@ -77,7 +77,7 @@ module Earl
       nil
     end
 
-    def receive_impl
+    def receive_impl # rubocop:disable Metrics/CyclomaticComplexity
       yield if closed?
 
       while empty?
