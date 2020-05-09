@@ -29,7 +29,7 @@ module Earl
       @done.receive?
 
       until @workers.all?(&:nil?)
-        Earl.sleep(1)
+        Earl.sleep(0.001)
       end
     end
 
@@ -51,7 +51,7 @@ module Earl
 
     def terminate
       @workers.each do |agent|
-        agent.stop rescue nil
+        agent&.stop rescue nil
       end
 
       @done.close
