@@ -3,7 +3,7 @@
 module Earl
   class Application < Supervisor
     def signals
-      @signals ||= [:INT, :TERM]
+      @signals ||= %i[INT TERM]
     end
 
     def call

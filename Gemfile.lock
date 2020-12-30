@@ -3,6 +3,7 @@ PATH
   specs:
     earl (0.1.0)
       async (~> 1.23)
+      async-io (~> 1.23)
 
 GEM
   remote: https://rubygems.org/
@@ -12,6 +13,8 @@ GEM
       console (~> 1.0)
       nio4r (~> 2.3)
       timers (~> 4.1)
+    async-io (1.29.0)
+      async (~> 1.14)
     console (1.8.2)
     jaro_winkler (1.5.4)
     minitest (5.14.0)

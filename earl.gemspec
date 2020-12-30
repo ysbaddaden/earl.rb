@@ -29,6 +29,7 @@ Gem::Specification.new do |s|
   }
 
   s.add_runtime_dependency "async", "~> 1.23"
+  s.add_runtime_dependency "async-io", "~> 1.23"
   s.add_development_dependency "minitest", "~> 5.0"
   s.add_development_dependency "rubocop", "~> 0.76"
 end

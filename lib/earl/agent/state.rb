@@ -3,6 +3,8 @@ require "earl/errors"
 
 module Earl
   module Agent
+    # Finite state machine that maintains the status of an `Agent`.
+    #
     # :nodoc:
     class State
       def initialize(agent)
