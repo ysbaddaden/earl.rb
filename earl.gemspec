@@ -28,8 +28,10 @@ Gem::Specification.new do |s|
     "wiki_uri" => "https://github.com/ysbaddaden/earl.rb/wiki",
   }
 
-  s.add_runtime_dependency "async", "~> 1.23"
-  s.add_runtime_dependency "async-io", "~> 1.23"
+  s.required_ruby_version = ">= 3.0"
+
+  # s.add_runtime_dependency "async", "~> 1.28"
+
   s.add_development_dependency "minitest", "~> 5.0"
-  s.add_development_dependency "rubocop", "~> 0.76"
+  s.add_development_dependency "standard"
 end

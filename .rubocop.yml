@@ -1,35 +1,45 @@
+require:
+  - standard
+
+inherit_gem:
+  standard: config/base.yml
+
 AllCops:
-  TargetRubyVersion: 2.5
-  DisabledByDefault: true
+  TargetRubyVersion: 3.0
 
-Bundler:
-  Enabled: true
+Layout/ExtraSpacing:
+  Enabled: false
 
-Lint:
-  Enabled: true
+Layout/HashAlignment:
+  Enabled: false
+
+Layout/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: space
+  EnforcedStyleForEmptyBraces: no_space
+
 Lint/AssignmentInCondition:
   Enabled: false
+
 Lint/AmbiguousBlockAssociation:
   Enabled: false
 
-Metrics/CyclomaticComplexity:
-  Enabled: true
-Metrics/ParameterLists:
-  Enabled: true
+Performance/RangeInclude:
+  Enabled: false # Range#cover? isn't equivalent to Range#include?
 
-Migration:
-  Enabled: true
+Standard/SemanticBlocks:
+  Enabled: false
 
-Naming:
-  Enabled: true
+#Style/EmptyMethod:
+#  EnforcedStyle: expanded
 
-Security:
-  Enabled: true
+#Style/FrozenStringLiteralComment:
+#  Enabled: true
 
-Style/EmptyMethod:
-  EnforcedStyle: expanded
-Style/FrozenStringLiteralComment:
-  Enabled: true
-Style/StringLiterals:
-  Enabled: true
-  EnforcedStyle: double_quotes
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
