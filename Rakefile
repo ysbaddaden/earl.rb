@@ -3,7 +3,9 @@ $LOAD_PATH.unshift "lib"
 $LOAD_PATH.unshift "test"
 
 task :test do
-  Dir.glob("test/**/*_test.rb").each do |path|
+  path = ENV.fetch("TESTS") { "test/**/*_test.rb" }
+
+  Dir.glob(path).each do |path|
     require_relative path
   end
 end
