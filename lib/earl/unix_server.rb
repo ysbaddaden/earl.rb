@@ -1,10 +1,10 @@
 # frozen_string_literal: true
-require "async/io/unix_socket"
-require "earl/socket/server"
 
-module Earl::Socket
+require "earl/basic_server"
+
+module Earl
   # :nodoc:
-  class UNIXServer < Server
+  class UNIXServer < BasicServer
     def initialize(path, mode, backlog = nil, &block)
       @path = path
       @mode = mode
@@ -13,19 +13,18 @@ module Earl::Socket
     end
 
     def call
-      @server = Async::IO::UNIXServer.wrap(@path)
+      @server = ::UNIXServer.new(@path)
       @server.listen(@backlog) if @backlog
       File.chmod(@path, @mode) if @mode
       log.info { "started unix server path=#{@path}" }
 
       loop do
         client, = @server.accept
-        p client
-
         log.debug { "incoming unix connection" }
         handle(client)
+      rescue *SERVER_EXCEPTIONS
+        # silence connection issues
       end
-    rescue Async::Wrapper::Cancelled
     end
   end
 end

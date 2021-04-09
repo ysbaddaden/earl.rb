@@ -1,7 +1,7 @@
 require "uri"
-require "earl/socket/ssl_server"
-require "earl/socket/tcp_server"
-require "earl/socket/unix_server"
+require "earl/ssl_server"
+require "earl/tcp_server"
+require "earl/unix_server"
 
 module Earl
   # A stream socket server.
@@ -20,7 +20,7 @@ module Earl
 
     # Adds a TCP server.
     def add_tcp_listener(host, port, backlog: nil)
-      server = Socket::TCPServer.new(host, port, backlog) do |client|
+      server = TCPServer.new(host, port, backlog) do |client|
         handle(client)
       end
       monitor(server)
@@ -28,7 +28,7 @@ module Earl
 
     # Adds a TCP server with transparent SSL handling.
     def add_ssl_listener(host, port, ssl_context, backlog: nil)
-      server = Socket::SSLServer.new(host, port, ssl_context, backlog) do |client|
+      server = SSLServer.new(host, port, ssl_context, backlog) do |client|
         handle(client)
       end
       monitor(server)
@@ -36,7 +36,7 @@ module Earl
 
     # Adds an UNIX server.
     def add_unix_listener(path, mode: nil, backlog: nil)
-      server = Socket::UNIXServer.new(path, mode, backlog) do |client|
+      server = UNIXServer.new(path, mode, backlog) do |client|
         handle(client)
       end
       monitor(server)
@@ -71,7 +71,7 @@ module Earl
     def started?
       running? && @agents.all? do |agent|
         if agent.respond_to?(:started?)
-          agent.started? # either Earl::Socket::TCPServer, Earl::Socket::UNIXServer or Earl::Socket::SSLServer
+          agent.started? # either Earl::TCPServer, Earl::UNIXServer or Earl::SSLServer
         else
           agent.running? # should be unreachable
         end
@@ -88,7 +88,7 @@ module Earl
       raise ArgumentError.new("please specify a host or ip to listen to") unless host
 
       # remove ipv6 brackets
-      if host.start_with?('[') && host.end_with?(']')
+      if host.start_with?("[") && host.end_with?("]")
         host = host[1..-2]
       end
 
@@ -102,15 +102,15 @@ module Earl
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.min_version = ssl_min_version
       ctx.ciphers = ssl_ciphers
-      ctx.ecdh_curves = ssl_curves
+      ctx.ecdh_curves = ssl_curves.join(":")
 
       case params["verify_mode"]
       when "peer"
-        ctx.verify_mode = OpenSSL::VERIFY_PEER
+        ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
       when "force-peer"
-        ctx.verify_mode = OpenSSL::VERIFY_FAIL_IF_NO_PEER_CERT
+        ctx.verify_mode = OpenSSL::SSL::VERIFY_FAIL_IF_NO_PEER_CERT
       when "none"
-        ctx.verify_mode = OpenSSL::VERIFY_NONE
+        ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
 
       crt = OpenSSL::X509::Certificate.new(File.read(params["cert"]))
@@ -119,7 +119,7 @@ module Earl
       if params["ca"]
         ca = OpenSSL::X509::Certificate.new(File.read(params["ca"]))
         ctx.add_certificate(crt, key, [ca])
-      elsif ctx.verify_mode == OpenSSL::VERIFY_PEER || ctx.verify_mode == OpenSSL::VERIFY_FAIL_IF_NO_PEER_CERT
+      elsif ctx.verify_mode == OpenSSL::SSL::VERIFY_PEER || ctx.verify_mode == OpenSSL::SSL::VERIFY_FAIL_IF_NO_PEER_CERT
         raise ArgumentError.new("please specify the SSL ca via 'ca'")
       else
         ctx.add_certificate(crt, key)

@@ -55,7 +55,7 @@ module Earl
       count = agents.size
 
       agents.each do |agent|
-        Async do
+        Fiber.schedule do
           while running? && agent.starting?
             agent.start(link: self)
           end

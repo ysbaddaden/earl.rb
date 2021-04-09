@@ -1,15 +1,30 @@
 # frozen_string_literal: true
-require "earl"
 
-module Earl::Socket
+require "earl"
+require "socket"
+
+module Earl
   # :nodoc:
-  class Server
+  class BasicServer
     include Earl::Agent
     include Earl::Logger
 
+    SERVER_EXCEPTIONS = [
+      Errno::ECONNABORTED,
+      Errno::ECONNRESET,
+      Errno::ETIMEDOUT,
+      Errno::EPIPE,
+      Errno::EBADF,
+      IOError,
+      OpenSSL::SSL::SSLError,
+      SocketError,
+    ]
+
     def handle(client)
-      Async do
+      Fiber.schedule do
         @handler.call(client)
+      rescue *SERVER_EXCEPTIONS
+        # silence connection issues
       rescue => ex
         log.exception(ex)
       ensure

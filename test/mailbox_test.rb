@@ -21,9 +21,9 @@ module Earl
     end
 
     def test_send
-      Async do
+      with_scheduler do
         counter = Counter.new(0)
-        counter.async
+        counter.schedule
 
         counter.send(2)
         eventually { assert_equal 2, counter.value }
@@ -39,7 +39,7 @@ module Earl
     end
 
     def test_receive
-      Async do
+      with_scheduler do
         counter = Counter.new(0)
 
         counter.send(1)
@@ -47,7 +47,7 @@ module Earl
         assert_equal 1, counter.__send__(:receive)
         assert_equal 2, counter.__send__(:receive)
 
-        counter.async
+        counter.schedule
         counter.stop
 
         assert_raises(ClosedError) { counter.__send__(:receive) }

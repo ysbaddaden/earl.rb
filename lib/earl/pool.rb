@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "earl/channel"
 
 module Earl
@@ -14,7 +15,7 @@ module Earl
 
     def call
       @capacity.times do
-        Async do
+        Fiber.schedule do
           agent = @agent_class.new
           @workers << agent
 
@@ -29,7 +30,7 @@ module Earl
       @done.receive?
 
       until @workers.all?(&:nil?)
-        Earl.sleep(0.001)
+        sleep(0.001)
       end
     end
 
@@ -51,7 +52,9 @@ module Earl
 
     def terminate
       @workers.each do |agent|
-        agent&.stop rescue nil
+        agent&.stop
+      rescue
+        nil
       end
 
       @done.close

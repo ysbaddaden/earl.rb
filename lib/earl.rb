@@ -1,14 +1,29 @@
 # frozen_string_literal: true
-require "async"
+
+#begin
+#  require "async"
+#
+#  # :nodoc:
+#  module Async
+#    # :nodoc:
+#    class Scheduler
+#      # :nodoc:
+#      def fiber(&block)
+#        task = Task.new(@reactor, &block)
+#        task.run
+#        task.fiber
+#      end
+#    end
+#  end
+#rescue LoadError
+#  begin
+#    require "evt"
+#  rescue LoadError
+#    abort "fatal: the async or evt gem is required"
+#  end
+#end
 
 module Earl
-  def self.run
-    Async do
-      yield application if block_given?
-      application.start
-    end
-  end
-
   def self.application
     @@application ||= Application.new.tap do |app|
       app.monitor(logger)
@@ -18,16 +33,9 @@ module Earl
   def self.logger
     @@logger ||= Logger::Actor.new(Logger::INFO, Logger::ConsoleBackend.new)
   end
-
-  def self.sleep(duration)
-    if task = Async::Task.current?
-      task.sleep(duration)
-    else
-      Kernel.sleep(duration)
-    end
-  end
 end
 
+require "earl/scheduler"
 require "earl/agent"
 require "earl/channel"
 require "earl/mailbox"

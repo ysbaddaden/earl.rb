@@ -1,10 +1,11 @@
 # frozen_string_literal: true
+
 require "earl/logger/backend"
 
 module Earl
   module Logger
     class ConsoleBackend < Backend
-      def initialize(io = STDOUT)
+      def initialize(io = $stdout)
         @io = io
       end
 

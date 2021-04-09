@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "earl/agent/state"
 
 module Earl
@@ -10,16 +11,16 @@ module Earl
         call
       rescue => e
         state.transition(:crashed)
-        link.trap(self, e) if link
+        link&.trap(self, e)
       else
-        link.trap(self, nil) if link
+        link&.trap(self, nil)
         stop if running?
         state.transition(:stopped)
       end
     end
 
-    def async(link: nil)
-      Async { start(link: link) }
+    def schedule(link: nil)
+      Fiber.schedule { start(link: link) }
     end
 
     def call
@@ -71,10 +72,6 @@ module Earl
     end
 
     protected
-
-    def sleep(duration)
-      Earl.sleep(duration)
-    end
 
     private
 

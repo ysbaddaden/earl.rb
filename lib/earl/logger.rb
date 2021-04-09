@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "earl/logger/severity"
 require "earl/logger/actor"
 require "earl/logger/console_backend"

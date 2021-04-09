@@ -18,7 +18,7 @@ module Earl
         @called = true
 
         while running?
-          sleep(0)
+          sleep(0.001)
         end
       end
 
@@ -48,11 +48,11 @@ module Earl
     end
 
     def test_state
-      Async do
+      with_scheduler do
         agent = StatusAgent.new
         assert agent.starting?
 
-        Async { agent.start }
+        Fiber.schedule { agent.start }
         assert agent.running?
 
         agent.stop
@@ -84,10 +84,10 @@ module Earl
       assert_equal 1, agent.terminated
     end
 
-    def test_async
-      Async do
+    def test_schedule
+      with_scheduler do
         agent = StatusAgent.new
-        agent.async
+        agent.schedule
         assert agent.running?
       ensure
         agent.stop

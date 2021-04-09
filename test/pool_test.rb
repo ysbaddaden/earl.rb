@@ -8,16 +8,16 @@ module Earl
 
       def handle(message)
         log.info "received #{message}"
-        Earl.sleep(0)
+        sleep(0)
         raise "chaos monkey" if rand(0..9) == 1
       end
     end
 
     def test_pool
-      Async do
+      with_scheduler do
         pool = Pool.new(Worker, 5)
 
-        Async do
+        Fiber.schedule do
           999.times { |i| pool.send(i) }
           pool.stop
         end

@@ -7,7 +7,7 @@ module Earl
     class EchoServer < Earl::SockServer
       def handle(client)
         while line = client.gets
-          client << "#{line}\n"
+          client << line
           client.flush
         end
       end
@@ -24,58 +24,62 @@ module Earl
     def test_add_many_listeners
       server = EchoServer.new
 
-      #ctx = OpenSSL::SSL::SSLContext.new
-      #crt = OpenSSL::X509::Certificate.new(File.read(File.expand_path("../ssl.crt", __dir__)))
-      #key = OpenSSL::PKey.read(File.read(File.expand_path("../ssl.key", __dir__)))
-      #ctx.add_certificate crt, key
+      #ssl_cert = File.expand_path("../ssl.crt", __dir__)
+      #ssl_key = File.expand_path("../ssl.key", __dir__)
 
-      server.add_unix_listener(path)
+      #server.add_unix_listener(path)
       server.add_tcp_listener("127.0.0.1", 9494)
-      #server.add_ssl_listener("127.0.0.1", 9595, ctx)
+      #server.add_listener("ssl://127.0.0.1:9595?cert=#{ssl_cert}&key=#{ssl_key}&mode=none")
 
-      Async do
-        server.async
+      n = 2
+
+      with_scheduler do
+        server.schedule
         eventually { assert server.started? }
 
         done = Channel.new
 
-        Async do
-          Async::IO::UNIXSocket.wrap(path) do |socket|
-            999.times do |i|
-              socket << "hello julien #{i} (UNIX)\n"
-              socket.flush
-              assert_equal "hello julien #{i} (UNIX)", socket.gets
-            end
-            done.send(1)
-          end
-        end
+        #Fiber.schedule do
+        #  UNIXSocket.open(path) do |socket|
+        #    n.times do |i|
+        #      socket << "hello julien #{i} (UNIX)\n"
+        #      socket.flush
+        #      assert_equal "hello julien #{i} (UNIX)\n", socket.gets
+        #    end
 
-        Async do
-          Async::IO::TCPSocket.wrap("127.0.0.1", 9494) do |socket|
+        #    done.send(:unix)
+        #  end
+        #end
+
+        Fiber.schedule do
+          TCPSocket.open("127.0.0.1", 9494) do |socket|
             # use buffer to send/read messages otherwise it takes seconds to run:
-            999.times { |i| socket << "hello julien #{i} (TCP)\n" }
+            n.times { |i| socket << "hello julien #{i} (TCP)\n" }
             socket.flush
-            999.times { |i| assert_equal "hello julien #{i} (TCP)", socket.gets }
-            done.send(1)
+            n.times { |i| assert_equal "hello julien #{i} (TCP)\n", socket.gets }
+
+            done.send(:tcp)
           end
         end
 
-        #Async do
-        #  socket = Async::IO::TCPSocket.open("127.0.0.1", 9595)
+        #Fiber.schedule do
+        #  tcp_socket = TCPSocket.new("127.0.0.1", 9595)
 
-        #  ctx = OpenSSL::SSL::SSLContext.new
-        #  ctx.verify_mode = OpenSSL::SSL::VerifyMode::NONE
-        #  socket = Async::IO::SSLSocket.new(socket, ctx)
+        #  socket = OpenSSL::SSL::SSLSocket.new(tcp_socket)
+        #  socket.sync_close = true
+        #  socket.connect # SSL client handshake
 
-        #  # use #read because Async::IO::SSLSocket#gets is private (?)
-        #  999.times { |i| socket.puts "hello julien #{i} (SSL)" }
-        #  socket.close_write
-        #  message = 999.times.map { |i| "hello julien #{i} (SSL)" }.join("\n")
-        #  assert_equal message, socket.read
+        #  n.times { |i| socket << "hello julien #{i} (SSL)\n" }
+        #  socket.flush
+        #  n.times { |i| assert_equal "hello julien #{i} (SSL)\n", socket.gets }
 
-        #  done.send(1)
+        #  done.send(:ssl)
         #ensure
-        #  socket.close
+        #  if socket
+        #    socket.close
+        #  else
+        #    tcp_socket.close
+        #  end
         #end
 
         1.times { done.receive }

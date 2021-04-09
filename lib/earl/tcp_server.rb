@@ -1,10 +1,10 @@
 # frozen_string_literal: true
-require "async/io/tcp_socket"
-require "earl/socket/server"
 
-module Earl::Socket
+require "earl/basic_server"
+
+module Earl
   # :nodoc:
-  class TCPServer < Server
+  class TCPServer < BasicServer
     def initialize(host, port, backlog = nil, &block)
       @host = host
       @port = port
@@ -13,7 +13,7 @@ module Earl::Socket
     end
 
     def call
-      @server = Async::IO::TCPServer.wrap(@host, @port)
+      @server = ::TCPServer.new(@host, @port)
       @server.listen(@backlog) if @backlog
       log.info { "started tcp server host=#{@host} port=#{@port}" }
 
@@ -21,8 +21,9 @@ module Earl::Socket
         client, = @server.accept
         log.debug { "incoming tcp connection" }
         handle(client)
+      rescue *SERVER_EXCEPTIONS
+        break
       end
-    rescue Async::Wrapper::Cancelled
     end
   end
 end

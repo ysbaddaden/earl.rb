@@ -1,17 +1,14 @@
 # frozen_string_literal: true
-require "async/notification"
 require "earl/errors"
 
 module Earl
-  class Channel
+  class AbstractChannel
     def initialize(capacity = 1000)
       @state = :open
       @capacity = capacity
       @size = 0
       @start = 0
       @values = Array.new(capacity)
-      @senders = Async::Notification.new
-      @receivers = Async::Notification.new
     end
 
     def empty?
@@ -43,9 +40,7 @@ module Earl
         @state = :closing
       end
 
-      @senders.signal   # .broadcast
-      @receivers.signal # .broadcast
-
+      close_impl
       nil
     end
 
@@ -64,7 +59,7 @@ module Earl
 
       while full?
         yield if closing?
-        @senders.wait
+        wait @senders
       end
 
       index = @start + @size
@@ -73,7 +68,7 @@ module Earl
       @values[index] = value
       @size += 1
 
-      @receivers.signal
+      signal @receivers
       nil
     end
 
@@ -82,7 +77,7 @@ module Earl
 
       while empty?
         yield if closed?
-        @receivers.wait
+        wait @receivers
       end
 
       value = @values[@start]
@@ -93,10 +88,114 @@ module Earl
       if closing?
         @state = :closed if empty?
       else
-        @senders.signal
+        signal @senders
       end
 
       value
     end
+
+    def close_impl
+      broadcast @senders
+      broadcast @receivers
+    end
+
+    def wait(_condition)
+      raise NotImplementedError.new
+    end
+
+    def signal(_condition)
+      raise NotImplementedError.new
+    end
+
+    def broadcast(_condition)
+      raise NotImplementedError.new
+    end
   end
+
+  # class Channel < AbstractChannel
+  #   def initialize(capacity = 1000)
+  #     super
+  #     @receivers = []
+  #     @senders = []
+  #   end
+
+  #   protected
+
+  #   def wait(fibers)
+  #     fibers << Fiber.current
+  #     Fiber.scheduler.block(self)
+  #   end
+
+  #   def signal(fibers)
+  #     if fiber = fibers.shift
+  #       Fiber.scheduler.unblock(self, fiber)
+  #     end
+  #   end
+
+  #   def broadcast(fibers)
+  #     fibers.each { |fiber| Fiber.scheduler.unblock(self, fiber) }
+  #     fibers.clear
+  #   end
+  # end
 end
+
+#if defined?(Async)
+#  require "async/notification"
+#
+#  class Earl::Channel < Earl::AbstractChannel
+#    def initialize(capacity = 1000)
+#      super
+#      @senders = Async::Notification.new
+#      @receivers = Async::Notification.new
+#    end
+#
+#    protected
+#
+#    def wait(condition)
+#      condition.wait
+#    end
+#
+#    def signal(condition)
+#      condition.signal
+#    end
+#
+#    def broadcast(condition)
+#      condition.signal
+#    end
+#  end
+#else
+  class Earl::Channel < Earl::AbstractChannel
+    def initialize(capacity = 1000)
+      super
+      @mutex = Mutex.new
+      @senders = ConditionVariable.new
+      @receivers = ConditionVariable.new
+    end
+
+    protected
+
+    def send_impl(value)
+      @mutex.synchronize { super }
+    end
+
+    def receive_impl
+      @mutex.synchronize { super }
+    end
+
+    def close_impl
+      @mutex.synchronize { super }
+    end
+
+    def wait(condition)
+      condition.wait(@mutex)
+    end
+
+    def signal(condition)
+      condition.signal
+    end
+
+    def broadcast(condition)
+      condition.broadcast
+    end
+  end
+#end

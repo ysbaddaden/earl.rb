@@ -30,23 +30,28 @@ class Bar
   end
 end
 
-Async do
-  # create agents:
-  foo = Foo.new
-  Earl.application.monitor(foo)
+# create agents:
+foo = Foo.new
+Earl.application.monitor(foo)
 
-  bar = Bar.new(foo)
-  Earl.application.monitor(bar)
+bar = Bar.new(foo)
+Earl.application.monitor(bar)
+
+#Async do
+  scheduler = Evt::Scheduler.new
+  Fiber.set_scheduler(scheduler)
 
   # spawn all agents (supervisor, logger, foo, bar)
-  Earl.application.async
+  Earl.application.schedule
 
   # send some messages:
-  1.upto(5) { |i| bar.send(i) }
+  1.upto(99) { |i| bar.send(i) }
 
   # let agents run:
   Earl.sleep(0.010)
 
   # stop everything:
-  Earl.application.stop
-end
+  # Earl.application.stop
+
+  scheduler.run
+#end

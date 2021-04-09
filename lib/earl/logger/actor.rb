@@ -27,7 +27,7 @@ module Earl
 
       def terminate
         until mailbox.__send__(:empty?)
-          Earl.sleep(0.001)
+          sleep(0.001)
         end
         nil
       end

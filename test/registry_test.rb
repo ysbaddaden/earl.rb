@@ -22,7 +22,7 @@ module Earl
     end
 
     def test_closed
-      Async do
+      with_scheduler do
         registry = Registry.new
         registry.stop
         assert registry.closed?
@@ -33,12 +33,12 @@ module Earl
     def test_send
       messages = (0..999).to_a
 
-      Async do
+      with_scheduler do
         registry = Registry.new
 
         consumers = 5.times.map do
           registry.register(consumer = Consumer.new)
-          consumer.async
+          consumer.schedule
           consumer
         end
 
@@ -57,10 +57,10 @@ module Earl
     end
 
     def test_silently_removes_stopped_agent
-      Async do
+      with_scheduler do
         registry = Earl::Registry.new
-        registry.register(a = Consumer.new); a.async
-        registry.register(b = Consumer.new); b.async
+        registry.register(a = Consumer.new); a.schedule
+        registry.register(b = Consumer.new); b.schedule
 
         # send a message (wait to be delivered)
         registry.send(1)
@@ -85,10 +85,10 @@ module Earl
     end
 
     def test_stops_registered_agents
-      Async do
+      with_scheduler do
         registry = Earl::Registry.new
-        registry.register(a = Consumer.new); a.async
-        registry.register(b = Consumer.new); b.async
+        registry.register(a = Consumer.new); a.schedule
+        registry.register(b = Consumer.new); b.schedule
         registry.stop
         eventually { assert a.stopped? && b.stopped? }
       end

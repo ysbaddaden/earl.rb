@@ -19,13 +19,13 @@ module Earl
 
       def call
         return unless @monkey
-        Earl.sleep 0
+        sleep(0)
         raise "chaos"
       end
     end
 
     def test_starts_and_stops_monitored_agents
-      Async do
+      with_scheduler do
         agents = [Pending.new, Pending.new, Pending.new]
         supervisor = Supervisor.new
 
@@ -33,7 +33,7 @@ module Earl
         assert supervisor.starting?
         assert agents.all?(&:starting?)
 
-        supervisor.async
+        supervisor.schedule
         eventually { assert supervisor.running? }
         eventually { assert agents.all?(&:running?) }
 
@@ -44,7 +44,7 @@ module Earl
     end
 
     def test_normal_termination_of_supervised_agents
-      Async do
+      with_scheduler do
         agents = [Noop.new, Noop.new]
         supervisor = Supervisor.new
 
@@ -52,7 +52,7 @@ module Earl
         assert supervisor.starting?
         assert agents.all?(&:starting?)
 
-        supervisor.async
+        supervisor.schedule
 
         eventually { assert supervisor.stopped? || supervisor.stopping? }
         eventually { assert agents.all? { |a| a.stopped? || a.stopping? } }
@@ -67,8 +67,8 @@ module Earl
       assert supervisor.starting?
       assert agent.starting?
 
-      Async do
-        supervisor.async
+      with_scheduler do
+        supervisor.schedule
         eventually { assert supervisor.running? }
 
         10.times do

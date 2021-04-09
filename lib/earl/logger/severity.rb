@@ -18,7 +18,7 @@ module Earl
     }.freeze
 
     def self.severity_char(severity)
-      SEVERITIES[severity] or raise("unreachable")
+      SEVERITIES[severity] || raise("unreachable")
     end
   end
 end

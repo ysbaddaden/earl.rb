@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Earl
   # A concurrency-safe registry of agents.
   #
@@ -17,7 +18,7 @@ module Earl
   # messages are sent much more often.
   class Registry
     def initialize
-      # @mutex = Mutex.new
+      # @mutex = Mutex.new unless defined?(Async)
       @subscriptions = []
       @closed = false
     end
@@ -37,17 +38,15 @@ module Earl
 
     def send(message)
       each do |agent|
-        begin
-          agent.send(message)
-        rescue ClosedError
-          unregister(agent) unless closed?
-        rescue ex
-          Logger.error(agent) { "failed to send to registered agent message=#{ex.message} (#{ex.class.name})" }
-          unregister(agent) unless closed?
-        end
+        agent.send(message)
+      rescue ClosedError
+        unregister(agent) unless closed?
+      rescue => ex
+        Earl.logger.error(agent) { "failed to send to registered agent message=#{ex.message} (#{ex.class.name})" }
+        unregister(agent) unless closed?
       end
 
-      Earl.sleep(0)
+      sleep(0)
     end
 
     def each
@@ -59,7 +58,9 @@ module Earl
     def stop
       synchronize { @closed = true }
       @subscriptions.each do |agent|
-        agent.stop rescue nil
+        agent.stop
+      rescue
+        nil
       end
       @subscriptions.clear
     end
@@ -71,11 +72,11 @@ module Earl
     private
 
     def synchronize
-      # if @mutex
-      #   @mutex.synchronize { yield }
-      # else
+      if @mutex
+        @mutex.synchronize { yield }
+      else
         yield
-      # end
+      end
     end
 
     # NOTE: must be called within `synchronize` block!
